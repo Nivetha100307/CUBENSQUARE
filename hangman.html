@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colorful Hangman Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            max-width: 800px;
+            width: 90%;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+        }
+
+        .score {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a6f);
+            padding: 10px 20px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(238, 90, 111, 0.4);
+        }
+
+        .lives {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            padding: 10px 20px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(68, 160, 141, 0.4);
+        }
+
+        .hangman-display {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .hangman-art {
+            font-family: 'Courier New', monospace;
+            font-size: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            white-space: pre-line;
+            line-height: 1.2;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .word-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #ffeaa7, #fdcb6e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .alphabet {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .letter-btn {
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+            color: white;
+            box-shadow: 0 4px 15px rgba(116, 185, 255, 0.4);
+        }
+
+        .letter-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(116, 185, 255, 0.6);
+        }
+
+        .letter-btn:disabled {
+            background: linear-gradient(45deg, #636e72, #2d3436);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        .letter-btn.correct {
+            background: linear-gradient(45deg, #00b894, #00a085);
+            box-shadow: 0 4px 15px rgba(0, 184, 148, 0.4);
+        }
+
+        .letter-btn.incorrect {
+            background: linear-gradient(45deg, #e17055, #d63031);
+            box-shadow: 0 4px 15px rgba(225, 112, 85, 0.4);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .new-game-btn {
+            background: linear-gradient(45deg, #a29bfe, #6c5ce7);
+            box-shadow: 0 4px 15px rgba(162, 155, 254, 0.4);
+        }
+
+        .hint-btn {
+            background: linear-gradient(45deg, #fd79a8, #e84393);
+            box-shadow: 0 4px 15px rgba(253, 121, 168, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .win-message {
+            color: #00b894;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .lose-message {
+            color: #e17055;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hint-display {
+            text-align: center;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: #ffeaa7;
+            font-style: italic;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-10px);
+            }
+
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .bounce {
+            animation: bounce 1s;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .word-display {
+                font-size: 1.8rem;
+                letter-spacing: 8px;
+            }
+
+            .alphabet {
+                grid-template-columns: repeat(6, 1fr);
+            }
+
+            .letter-btn {
+                padding: 12px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <h1>🎯 HANGMAN GAME 🎯</h1>
+
+        <div class="game-info">
+            <div class="score">Score: <span id="score">0</span></div>
+            <div class="lives">Lives: <span id="lives">6</span></div>
+        </div>
+
+        <div class="hangman-display">
+            <div class="hangman-art" id="hangman-art"></div>
+        </div>
+
+        <div class="word-display" id="word-display"></div>
+
+        <div class="hint-display" id="hint-display"></div>
+
+        <div class="alphabet" id="alphabet"></div>
+
+        <div class="message" id="message"></div>
+
+        <div class="controls">
+            <button class="btn new-game-btn" onclick="startNewGame()">🎮 New Game</button>
+            <button class="btn hint-btn" id="hint-btn" onclick="showHint()">💡 Hint</button>
+        </div>
+    </div>
+
+    <script>
+        const words = [
+            { word: 'JAVASCRIPT', hint: 'Popular programming language for web development' },
+            { word: 'RAINBOW', hint: 'Colorful arc in the sky after rain' },
+            { word: 'BUTTERFLY', hint: 'Colorful insect with wings' },
+            { word: 'ELEPHANT', hint: 'Large gray mammal with a trunk' },
+            { word: 'CHOCOLATE', hint: 'Sweet treat loved by many' },
+            { word: 'ADVENTURE', hint: 'Exciting journey or experience' },
+            { word: 'SUNSHINE', hint: 'Bright light from the sun' },
+            { word: 'TREASURE', hint: 'Valuable hidden items' },
+            { word: 'MOUNTAIN', hint: 'Large natural elevation of earth' },
+            { word: 'FIREWORKS', hint: 'Colorful explosions in the sky' },
+            { word: 'KEYBOARD', hint: 'Device used for typing' },
+            { word: 'SANDWICH', hint: 'Food between two slices of bread' },
+            { word: 'UMBRELLA', hint: 'Protection from rain' },
+            { word: 'TELESCOPE', hint: 'Device for viewing distant objects' },
+            { word: 'BUTTERFLY', hint: 'Insect that transforms from caterpillar' }
+        ];
+
+        const hangmanStages = [
+            '', // 0 wrong guesses
+            '   +---+\n   |   |\n       |\n       |\n       |\n       |\n=========',
+            '   +---+\n   |   |\n   |   |\n       |\n       |\n       |\n=========',
+            '   +---+\n   |   |\n   |   |\n   O   |\n       |\n       |\n=========',
+            '   +---+\n   |   |\n   |   |\n   O   |\n   |   |\n       |\n=========',
+            '   +---+\n   |   |\n   |   |\n   O   |\n  /|   |\n       |\n=========',
+            '   +---+\n   |   |\n   |   |\n   O   |\n  /|\\  |\n       |\n=========',
+            '   +---+\n   |   |\n   |   |\n   O   |\n  /|\\  |\n  /    |\n=========',
+            '   +---+\n   |   |\n   |   |\n   O   |\n  /|\\  |\n  / \\  |\n========='
+        ];
+
+        let currentWord = '';
+        let currentHint = '';
+        let guessedLetters = [];
+        let wrongGuesses = 0;
+        let score = 0;
+        let gameOver = false;
+        let hintUsed = false;
+
+        function startNewGame() {
+            const randomIndex = Math.floor(Math.random() * words.length);
+            currentWord = words[randomIndex].word;
+            currentHint = words[randomIndex].hint;
+            guessedLetters = [];
+            wrongGuesses = 0;
+            gameOver = false;
+            hintUsed = false;
+
+            document.getElementById('hint-btn').disabled = false;
+            document.getElementById('hint-display').textContent = '';
+            document.getElementById('message').textContent = '';
+            document.getElementById('message').className = 'message';
+
+            updateDisplay();
+            createAlphabet();
+        }
+
+        function createAlphabet() {
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const alphabetContainer = document.getElementById('alphabet');
+            alphabetContainer.innerHTML = '';
+
+            for (let letter of alphabet) {
+                const button = document.createElement('button');
+                button.textContent = letter;
+                button.className = 'letter-btn';
+                button.onclick = () => guessLetter(letter);
+                alphabetContainer.appendChild(button);
+            }
+        }
+
+        function guessLetter(letter) {
+            if (gameOver || guessedLetters.includes(letter)) return;
+
+            guessedLetters.push(letter);
+            const button = [...document.querySelectorAll('.letter-btn')].find(btn => btn.textContent === letter);
+            button.disabled = true;
+
+            if (currentWord.includes(letter)) {
+                button.classList.add('correct');
+                button.classList.add('bounce');
+                checkWin();
+            } else {
+                button.classList.add('incorrect');
+                wrongGuesses++;
+                if (wrongGuesses >= 6) {
+                    gameOver = true;
+                    showMessage('Game Over! The word was: ' + currentWord, 'lose-message');
+                }
+            }
+
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            // Update word display
+            let display = '';
+            for (let letter of currentWord) {
+                if (guessedLetters.includes(letter)) {
+                    display += letter + ' ';
+                } else {
+                    display += '_ ';
+                }
+            }
+            document.getElementById('word-display').textContent = display.trim();
+
+            // Update hangman art
+            document.getElementById('hangman-art').textContent = hangmanStages[wrongGuesses];
+
+            // Update lives
+            document.getElementById('lives').textContent = 6 - wrongGuesses;
+
+            // Update score display
+            document.getElementById('score').textContent = score;
+        }
+
+        function checkWin() {
+            const isComplete = currentWord.split('').every(letter => guessedLetters.includes(letter));
+            if (isComplete) {
+                gameOver = true;
+                let points = 10 - wrongGuesses;
+                if (hintUsed) points = Math.max(1, points - 3);
+                score += points;
+                showMessage(`Congratulations! You won! +${points} points`, 'win-message');
+                document.getElementById('score').textContent = score;
+            }
+        }
+
+        function showMessage(text, className) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = 'message ' + className;
+        }
+
+        function showHint() {
+            if (!hintUsed && !gameOver) {
+                hintUsed = true;
+                document.getElementById('hint-display').textContent = '💡 Hint: ' + currentHint;
+                document.getElementById('hint-btn').disabled = true;
+            }
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', function (event) {
+            const letter = event.key.toUpperCase();
+            if (letter >= 'A' && letter <= 'Z') {
+                guessLetter(letter);
+            }
+        });
+
+        // Initialize game
+        startNewGame();
+    </script>
+</body>
+
+</html>
